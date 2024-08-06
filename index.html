@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <title>
+            MumbAI - Simulated Drving AI
+        </title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body onload="initilize_page_elements()" onresize="initilize_page_elements()">
+        <div id="main_screen">
+            <canvas id="main_canvas"></canvas>
+            <p id="warning_box" class="textSize_1">For the best experience, please make sure your viewing window is on a landscape ratio. If you're using a phone, consider switching to a computer instead as both the trainig and testing will use a lot of processing power.</p>
+            
+            <input class="textSize_1 numbers" type="number" id="layers_number" name="layer_number"  min="1" max="20" value="3"/>
+            <input class="textSize_1 numbers" type="number" id="neurons_number" name="neuron_number"  min="1" max="50" value="8"/>
+            <input class="textSize_1 numbers" type="number" id="cars_number" name="cars_number"  min="1" max="500" value="50"/>
+            <input class="textSize_1 numbers" type="number" id="epochs_number" name="epochs_number"  min="1" max="20" value="10"/>
+            <input class="textSize_1 numbers" type="number" id="fitness_number" name="fitness_number"  min="1" max="100" value="75"/>
+            <input class="textSize_1 numbers" type="number" id="mutation_number" name="mutation_number"  min="1" max="100" value="20"/>
+            <button class="textSize_0 button" type="button" id="train_button" onclick="train()">Begin Training</button> 
+            <input class="textSize_1 numbers" type="number" id="cart_number" name="cart_number"  min="1" max="100"/>
+            <button class="textSize_0 button" type="button" id="testl_button" onclick="test_left()" disabled>Begin Testing</button> 
+
+            <label class="input_label" id="nn_file_input">
+                <input type="file" id="nn_file" name="nn_file" accept=".nn" onchange="file_uploaded()"/>
+                Upload you own .nn file
+            </label>
+            
+            <button class="textSize_0 button" type="button" id="default_nn_button" onclick="select_default_nn()">Use default Neural Network</button> 
+            <input class="textSize_1 numbers" type="number" id="carr_number" name="carr_number"  min="1" max="100"/>
+            <button class="textSize_0 button" type="button" id="testr_button" onclick="test_right()" disabled>Begin Testing</button> 
+
+
+
+            
+        </div>
+        <div id="custom_option_container">
+            <input class="textSize_0 boxy" type="checkbox" id="check_wf" name="check_wf" value="check_wf" onclick="wireframe_check()">
+            <label class="textSize_1" id="check_wf_l"> Wireframe mode</label>
+            <input class="textSize_0 boxy" type="checkbox" id="check_lb" name="check_lb" value="check_lb" onclick="lb_check()">
+            <label class="textSize_1" id="check_lb_l"> Leaderboard View</label>
+            <input class="textSize_0 boxy" type="checkbox" id="check_nn" name="check_nn" value="check_nn" onclick="nn_check()">
+            <label class="textSize_1" id="check_nn_l"> Neural Network View</label>
+            <input class="textSize_0 boxy" type="checkbox" id="check_cd" name="check_cd" value="check_cd" onclick="cd_check()">
+            <label class="textSize_1" id="check_cd_l"> Car Dashboard View</label>
+        </div>
+        <div id="car_data_container">
+            <canvas id="car_data_canvas_bg"></canvas>
+            <canvas id="car_data_canvas"></canvas>
+            <canvas id="car_data_canvas_fg"></canvas>
+        </div>
+        <div id="neural_network_visualizer_container">
+            <canvas id="neural_network_visualizer_canvas_bg"></canvas>
+            <canvas id="neural_network_visualizer_canvas"></canvas>
+        </div>
+        <div id="leaderboard_container">
+            <canvas id="leaderboard_canvas_bg"></canvas>
+            <canvas id="leaderboard_canvas"></canvas>
+        </div>
+        <script type="text/javascript" src="Utils.js"></script>
+        <script type="text/javascript" src="Road.js"></script>
+        <script type="text/javascript" src="Curve.js"></script>
+        <script type="text/javascript" src="Intersection.js"></script>
+        <script type="text/javascript" src="Controls.js"></script>
+        <script type="text/javascript" src="Level.js"></script>
+        <script type="text/javascript" src="NeuralNetwork.js"></script>
+        <script type="text/javascript" src="Car.js"></script>
+        <script type="text/javascript" src="Sensors.js"></script>
+        <script type="text/javascript" src="Dashboard.js"></script>
+        <script type="text/javascript" src="Leaderboard.js"></script>
+
+        <script type="text/javascript" src="main.js"></script>
+    </body>
+</html>
