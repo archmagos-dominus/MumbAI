@@ -13,8 +13,6 @@ class Car{
         this.width=width;
         this.height=height;
         //array to store the car data used for diplay 
-        this.score=0;
-        this.stationary_ms=null;
         this.data={
             spd:"0",
             rpm:"0",
@@ -40,6 +38,12 @@ class Car{
         this.damaged = false;
         this.engineDamage = 0;
         this.gearboxDamage = 0;
+        //scoring related vars
+        this.score=0;
+        this.stationary_ms=null;
+        this.on_intersection=null;
+        this.intersection=false;
+        this.intersection_mistakes=0;
         //VEHICLE PARAMETERS
         //gearbox
         //positive gears - forward gears 
@@ -686,7 +690,7 @@ class Car{
         this.currentLocation.forEach(road_segment=>{
             //check for the speed limit
             //iterate throught hte directional boxes of the road segment (if any)
-            road_segment.directionBoxes.forEach(directional_box =>{
+            road_segment.directionBoxes.forEach((directional_box, index) =>{
                 if (road_segment.type=="road") {
                     //check if the car is on this box
                     //please refractor the road/curve/intersection classes to simplify this retardation
@@ -730,15 +734,38 @@ class Car{
                     }
                 } else if (road_segment.type=="curve"){
                     //console.log("car on curve")
-                    //this shit is hard, I'll just do it at some later date
-                } else {
-                    //console.log("car on intersection")
-                    //this one is a bit complicated too, same
+                    //I'll just do it at some later date
+                } else if (road_segment.type=="intersection")  {                    ////////////////////////still needs work
+                    //check if the car is inside the intersection
+                    if ((inside(this.car_center,road_segment.roadSurface))) {
+                        //check if vars are set
+                        if (!this.intersection) {
+                            //set the vars up
+                            this.intersection=true;
+                            this.on_intersection=index;
+                            this.intersection_mistakes=0;
+                        } else {
+                            //check to see if the current box is either the same of the next box (car moving CCW)
+                            //special cae for the loop as well
+                            if ((index==this.on_intersection) || (index==this.on_intersection+1) || ((index==0)&&(this.on_intersection==road_segment.directionBoxes.length-1))) {
+                                this.on_intersection=index;
+                            } else {
+                                this.intersection_mistakes++;
+                                this.on_intersection=index;
+                            }
+                        }
+                    } else if (this.intersection){
+                        //turn off intersection check
+                        this.intersection=false;
+                        this.on_intersection=-1;
+                        //see what score you need to give the car 
+                        console.log(this.intersection_mistakes)
+                    }
                 }
             });
             //check for any lines that the car is on
             //use the polygon intersects with the lines from teh lanes
-            if (road_segment.type=="road"){
+            if (road_segment.type=="road"){//move this up to the other if<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 //make sure to remove this check after we refactor the road, curve and intersection as well
                 road_segment.interdirectionalLineCoords.forEach(lane_line =>{
                     if(polygonIntersects(this.polygon, lane_line)){

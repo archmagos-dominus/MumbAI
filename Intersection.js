@@ -1,8 +1,9 @@
 //Intersection class
 //handles the creation and behaviour of intersections
 class Intersection{
-    constructor(connectedRoads=[], connectedRoadsCoords=[]){
+    constructor(connectedRoads, connectedRoadsCoords=[]){
         this.speedLimit=20;
+        this.type="intersection";
         //create borders
         this.borders = [];
         for (let index = 0; index < connectedRoadsCoords.length; index++) {
@@ -36,7 +37,6 @@ class Intersection{
             temp.push(border.end);
             this.border.push(temp);
         })
-        //this.border = [this.border];
         //create a surface area to draw
         this.roadSurface = [];
         for (let index = 0; index < connectedRoadsCoords.length; index++) {
@@ -59,7 +59,7 @@ class Intersection{
             }
         }
 
-        this.road_surface=[]; //not needed for now, maybe we can do it later but better
+        this.road_surface=structuredClone(this.roadSurface); //pls remove the need for this in refactoring PLS
 
 
         //intersection decoration
@@ -97,26 +97,6 @@ class Intersection{
             extremes.y_min=(this.decoration_poly_coords[index].y<extremes.y_min)?this.decoration_poly_coords[index].y:extremes.y_min;
             extremes.y_max=(this.decoration_poly_coords[index].y>extremes.y_max)?this.decoration_poly_coords[index].y:extremes.y_max;
         }
-        // //create teh criss cross origins
-        // this.extreme_rect = [
-        //     {
-        //         x:extremes.x_min,
-        //         y:extremes.y_min,
-        //     },
-        //     {
-        //         x:extremes.x_max,
-        //         y:extremes.y_min,
-        //     },
-        //     {
-        //         x:extremes.x_max,
-        //         y:extremes.y_max,
-        //     },
-        //     {
-        //         x:extremes.x_min,
-        //         y:extremes.y_max,
-        //     }
-        // ];
-
         //create TB diagonal
         let diagonal_tb = [
             {
@@ -175,8 +155,86 @@ class Intersection{
                 this.criss_cross_segments.push(structuredClone(contact_points));
             }
         }
-        console.log(this.criss_cross_segments)
 
+        //intersection 'lane' boxes
+        this.directionBoxes=[];
+        //iterate though the connected roads
+        for (let i = 0; i < connectedRoads.length; i++) {
+            //check if the road is inbound or outbound to better understand the direction of it's lanes
+            if (connectedRoads[i].direction) {
+                //road is outbound from the intersection
+                //iterate through it's directional boxes 
+                for (let j = connectedRoads[i].road.directionBoxes.length-1; j > -1; j--) {
+                    //create a shape that contains the two left extremes of the directional box and the center of the intersection
+                    let shape = [
+                        connectedRoads[i].road.directionBoxes[j].coords.topLeft,
+                        connectedRoads[i].road.directionBoxes[j].coords.bottomLeft,
+                        center
+                    ];
+                    //check if current perimeter is in continuation of the last (if not, add another perimeter formed from coord 2 of the last one and the 1st of the current one)
+                    if (this.directionBoxes.length && (shape[0] != this.directionBoxes[this.directionBoxes.length-1][1])) {
+                        let auxialliary_shape = [
+                            this.directionBoxes[this.directionBoxes.length-1][1],
+                            shape[0],
+                            center
+                        ];
+                        //push this auxilliary shape to the boxes array
+                        this.directionBoxes.push(auxialliary_shape);
+                    }
+                    //push this shape to the boxes array
+                    this.directionBoxes.push(shape);
+                }
+            } else {
+                //road is inbound to the intersection
+                //iterate through it's directional boxes, but in reverse
+                for (let j = 0; j < connectedRoads[i].road.directionBoxes.length; j++) {
+                    //create a shape that contains the two right extremes of the directional box and the center of the intersection
+                    let shape = [
+                        connectedRoads[i].road.directionBoxes[j].coords.bottomRight,
+                        connectedRoads[i].road.directionBoxes[j].coords.topRight,
+                        center
+                    ];
+                    //push this shape to the boxes array
+                    this.directionBoxes.push(shape);
+                }
+            }
+        }
+        let temp_boxes = structuredClone(this.directionBoxes);
+        let offset =0;
+        //iterate through all the current boxes
+
+        //show the boxes in the console, and check manually, in the 'square' intersections which points we are supposed to count
+        //maybe there's something wrong in the definition, putting up the wrong point order?
+
+        for (let h = 0; h < this.directionBoxes.length; h++) {
+            //check if the current on is the last one
+            if (h==this.directionBoxes.length-1) {
+                //check if it connects with the first
+                if (this.directionBoxes[h][1] != this.directionBoxes[0][0]) {
+                    let auxialliary_shape = [
+                        this.directionBoxes[h][1],
+                        this.directionBoxes[0][0],
+                        center
+                    ];
+                    //push this auxilliary shape to the boxes array
+                    temp_boxes.splice(0+offset, 0, auxialliary_shape);
+                    offset++;
+                }
+            } else {
+                //check if it connects with the next
+                if (this.directionBoxes[h][1] != this.directionBoxes[h+1][0]) {
+                    let auxialliary_shape = [
+                        this.directionBoxes[h][1],
+                        this.directionBoxes[h+1][0],
+                        center
+                    ];
+                    //push this auxilliary shape to the boxes array
+                    temp_boxes.splice(h+1+offset, 0, auxialliary_shape);
+                    offset++;
+                }
+            }            
+        }
+        this.directionBoxes=temp_boxes;
     }
 
     draw(ctx){
@@ -229,6 +287,31 @@ class Intersection{
         // }
         // ctx.closePath();
         // ctx.stroke();
+        //debug (show directional boxes)
+        for (let index = 0; index < this.directionBoxes.length; index++) {
+            ctx.beginPath();
+            ctx.fillStyle=`rgb(${index*20}, ${index*20}, ${index*20})`;
+            ctx.moveTo(this.directionBoxes[index][0].x,this.directionBoxes[index][0].y);
+            for (let k = 0; k < this.directionBoxes[index].length; k++) {
+                ctx.lineTo(this.directionBoxes[index][k].x,this.directionBoxes[index][k].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            //show the connection points
+            // ctx.beginPath();
+            // ctx.arc(this.directionBoxes[index][0].x, this.directionBoxes[index][0].y, 5, 0, 2 * Math.PI);
+            // ctx.fillStyle="red";
+            // ctx.fill(); 
+            // ctx.beginPath();
+            // ctx.arc(this.directionBoxes[index][1].x, this.directionBoxes[index][1].y, 10, 0, 2 * Math.PI);
+            // ctx.fillStyle="white";
+            // ctx.fill(); 
+            // ctx.beginPath();
+            // ctx.arc(this.directionBoxes[index][2].x, this.directionBoxes[index][2].y, 10, 0, 2 * Math.PI);
+            // ctx.fillStyle="yellow";
+            // ctx.fill(); 
+        }
+        
     }
 
     //draw wireframe 

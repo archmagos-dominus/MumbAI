@@ -1848,9 +1848,18 @@ function createMap() {
     //B
     var B = new Intersection(
         connectedRoads=[
-            BA,
-            BH,
-            BC
+            {
+                road:BA,
+                direction:true //OUT
+            },
+            {
+                road:BH,
+                direction:true //OUT
+            },
+            {
+                road:BC,
+                direction:true //OUT
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -1871,9 +1880,18 @@ function createMap() {
     //C
     var C = new Intersection(
         connectedRoads=[
-            BC,
-            SC,
-            CD
+            {
+                road:BC,
+                direction:false //in
+            },
+            {
+                road:SC,
+                direction:false //in
+            },
+            {
+                road:CD,
+                direction:true //OUT
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -1894,10 +1912,22 @@ function createMap() {
     //D
     var D = new Intersection(
         connectedRoads=[
-            CD,
-            LD,
-            DE,
-            DF
+            {
+                road:CD,
+                direction:false
+            },
+            {
+                road:LD,
+                direction:false
+            },
+            {
+                road:DE,
+                direction:true
+            },
+            {
+                road:DF,
+                direction:true 
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -1922,9 +1952,18 @@ function createMap() {
     //E
     var E = new Intersection(
         connectedRoads=[
-            DE,
-            OE,
-            EG
+            {
+                road:DE,
+                direction:false
+            },
+            {
+                road:OE,
+                direction:false
+            },
+            {
+                road:EG,
+                direction:true
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -1945,9 +1984,18 @@ function createMap() {
     //F
     var F = new Intersection(
         connectedRoads=[
-            AF,
-            DF,
-            GF
+            {
+                road:AF,
+                direction:false
+            },
+            {
+                road:DF,
+                direction:false
+            },
+            {
+                road:GF,
+                direction:false
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -1968,9 +2016,18 @@ function createMap() {
     //I
     var I = new Intersection(
         connectedRoads=[
-            HI,
-            IR,
-            IJ
+            {
+                road:HI,
+                direction:false
+            },
+            {
+                road:IJ,
+                direction:true
+            },
+            {
+                road:IR,
+                direction:true
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -1991,9 +2048,18 @@ function createMap() {
     //J
     var J = new Intersection(
         connectedRoads=[
-            IJ,
-            JQ,
-            JK
+            {
+                road:IJ,
+                direction:false
+            },
+            {
+                road:JK,
+                direction:true
+            },
+            {
+                road:JQ,
+                direction:true
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -2014,9 +2080,18 @@ function createMap() {
     //K
     var K = new Intersection(
         connectedRoads=[
-            JK,
-            PK,
-            KL
+            {
+                road:JK,
+                direction:false
+            },
+            {
+                road:KL,
+                direction:true
+            },
+            {
+                road:PK,
+                direction:false
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -2037,9 +2112,18 @@ function createMap() {
     //L
     var L = new Intersection(
         connectedRoads=[
-            KL,
-            LD,
-            LM
+            {
+                road:KL,
+                direction:false
+            },
+            {
+                road:LM,
+                direction:true
+            },
+            {
+                road:LD,
+                direction:true
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -2060,9 +2144,18 @@ function createMap() {
     //M
     var M = new Intersection(
         connectedRoads=[
-            LM,
-            MN,
-            MO
+            {
+                road:LM,
+                direction:false
+            },
+            {
+                road:MO,
+                direction:true
+            },
+            {
+                road:MN,
+                direction:true
+            }
         ],
         connectedRoadsCoords=[
             [
@@ -2083,9 +2176,19 @@ function createMap() {
     //N
     var N = new Intersection(
         connectedRoads=[
-            N8,
-            MN,
-            N0
+            {
+                road:N8,
+                direction:false
+            },
+            {
+                road:MN,
+                direction:false
+            },
+            {
+                road:N0,
+                direction:true
+            }
+
         ],
         connectedRoadsCoords=[
             [
