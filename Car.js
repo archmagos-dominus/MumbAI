@@ -742,16 +742,19 @@ class Car{
                         if (!this.intersection) {
                             //set the vars up
                             this.intersection=true;
-                            this.on_intersection=index;
+                            this.on_intersection=-2;
                             this.intersection_mistakes=0;
                         } else {
-                            //check to see if the current box is either the same of the next box (car moving CCW)
-                            //special cae for the loop as well
-                            if ((index==this.on_intersection) || (index==this.on_intersection+1) || ((index==0)&&(this.on_intersection==road_segment.directionBoxes.length-1))) {
-                                this.on_intersection=index;
-                            } else {
-                                this.intersection_mistakes++;
-                                this.on_intersection=index;
+                            //check to see if the car is in the current box
+                            if ((inside(this.car_center,directional_box))) {
+                                //check to see if the current box is either the same of the next box (car moving CCW)
+                                //special cae for the loop as well
+                                if ((index==this.on_intersection) || (index==this.on_intersection+1) || ((index==0)&&(this.on_intersection==road_segment.directionBoxes.length-1))) {
+                                    this.on_intersection=index;
+                                } else {
+                                    this.intersection_mistakes++;
+                                    this.on_intersection=index;
+                                }
                             }
                         }
                     } else if (this.intersection){
@@ -759,7 +762,10 @@ class Car{
                         this.intersection=false;
                         this.on_intersection=-1;
                         //see what score you need to give the car 
-                        console.log(this.intersection_mistakes)
+                        this.intersection_mistakes--; //substract the first mistake because it's easier to do this than to rebuild the entire thing blep
+                        // give it the correct score
+                        (this.intersection_mistakes==0)?score_calc+=1000:score_calc-=100;
+                        //console.log("left intersection; mistakes: ",this.intersection_mistakes);
                     }
                 }
             });
