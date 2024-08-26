@@ -43,88 +43,79 @@ class Curve{
         this.interlaneLinesRs=[];
         this.directionBoxes=[];
 
-        var templane = lanes[0];
-        //make more sense of this bullshit later lmfaoooooo
-        var arcCoords =[];
-        var directionalPoly = [this.startCoords];
-        for (let i = 1; i < curveAngle+this.detail; i+=this.detail) {
-            let angle = 0;
-            if (direction) {
-                angle = degrees_to_radians(startAngle+i-90);
-            } else {
-                angle = degrees_to_radians(startAngle-i+90);
-            }
-            let tempPoint = {
-                x:this.startCoords.x + this.laneWidth * Math.cos(angle),
-                y:this.startCoords.y + this.laneWidth * Math.sin(angle)
-            };
-            arcCoords.push(
-                tempPoint
-            );
-        }
+        //create the directional boxes for lane detection
+        let templane = lanes[0];                    //select the first lane
+        let arcCoords=[];                           //initialize an array to store the coords of the arc dictated by the lane
+        let directionalPoly = [this.startCoords];   //first coords are the road coords
+        //create the arc points described by the first lane
+        
+        //direction boxes are just one lane wide even for those that are larger or something
+        //there is only one of them when drawing it for some reason
 
-        //WE GETTING OUT OF THE HOOD WITH THIS ONE
-        for (let i = 0; i < lanes.length-1; i++) {
-            //check if next lane goes in the same direction
-            if (lanes[i+1] == templane) {
-                //just store the coords for the interlane lines
-                this.interlaneLinesRs.push(laneWidth*(i+1));
-                templane=lanes[i+1];
-                //expand directional box
-                arcCoords =[];
-                for (let j = 1; j < curveAngle+this.detail; j+=this.detail) {
+        //iterate throught the remaining lanes 
+        for (let j = 0; j < lanes.length; j++) {
+            //check if the current lane is the last
+            if (j==lanes.length-1) {
+                //calculate the points of the edge arc
+                for (let i = 1; i < curveAngle+this.detail; i+=this.detail) {
                     let angle = 0;
                     if (direction) {
-                        angle = degrees_to_radians(startAngle+j-90);
+                        angle = degrees_to_radians(startAngle+i-90);
                     } else {
-                        angle = degrees_to_radians(startAngle-j+90);
+                        angle = degrees_to_radians(startAngle-i+90);
                     }
                     let tempPoint = {
-                        x:this.startCoords.x + laneWidth*(i+2) * Math.cos(angle),
-                        y:this.startCoords.y + laneWidth*(i+2) * Math.sin(angle)
+                        x:this.startCoords.x + (j+1)*laneWidth * Math.cos(angle),
+                        y:this.startCoords.y + (j+1)*laneWidth * Math.sin(angle)
                     };
-                    
                     arcCoords.push(
                         tempPoint
                     );
                 }
-            } else {
-                //store coords for the interdirectional line
-                this.interdirectionalLineRs.push(laneWidth*(i+1));
-                templane=lanes[i+1];
-                //store coords for the directional box
+                //create and store the final directional box
                 this.directionBoxes.push({
-                    direction:lanes[i],
+                    direction:lanes[j],
                     coords:directionalPoly.concat(arcCoords)
                 });
-                //create new directional box
-                //we need to take into accound the past arc
-                //reverse the points of the past arc
-                directionalPoly = arcCoords.reverse();
-                arcCoords = [];
-                 //expand directional box
-                for (let j = 1; j < curveAngle+this.detail; j+=this.detail) {
-                    let angle = 0;
-                    if (direction) {
-                        angle = degrees_to_radians(startAngle+j-90);
-                    } else {
-                        angle = degrees_to_radians(startAngle-j+90);
+            } else {
+                //check in which direction the next lane goes
+                if (templane==lanes[j+1]) { //lane goes in the same direction
+                    //just store the coords for the interlane lines
+                    this.interlaneLinesRs.push(laneWidth*(j+1));
+                    templane=lanes[j+1];
+                } else {                    //lane goes in the opposite direction
+                    //store coords for the interdirectional line
+                    this.interdirectionalLineRs.push(laneWidth*(j+1));
+                    //calculate the points of the edge arc
+                    for (let i = 1; i < curveAngle+this.detail; i+=this.detail) {
+                        let angle = 0;
+                        if (direction) {
+                            angle = degrees_to_radians(startAngle+i-90);
+                        } else {
+                            angle = degrees_to_radians(startAngle-i+90);
+                        }
+                        let tempPoint = {
+                            x:this.startCoords.x + (j+1)*laneWidth * Math.cos(angle),
+                            y:this.startCoords.y + (j+1)*laneWidth * Math.sin(angle)
+                        };
+                        arcCoords.push(
+                            tempPoint
+                        );
                     }
-                    let tempPoint = {
-                        x:this.startCoords.x + laneWidth*(i+2) * Math.cos(angle),
-                        y:this.startCoords.y + laneWidth*(i+2) * Math.sin(angle)
-                    };
-                    arcCoords.push(
-                        tempPoint
-                    );
+                    //create and store the current directional box
+                    this.directionBoxes.push({
+                        direction:lanes[j],
+                        coords:directionalPoly.concat(arcCoords)
+                    });
+                    //start the next directional box, starting from the current arc (reversed)
+                    directionalPoly = arcCoords.reverse();
+                    arcCoords = []; //reset arccoords value
+                    templane=lanes[j+1];
                 }
             }
         }
-        //store teh last of teh box coords
-        this.directionBoxes.push({
-            direction:lanes[lanes.length-1],
-            coords:directionalPoly.concat(arcCoords)
-        });
+
+        console.log(this.directionBoxes)
         
         //define te borders - in this case is an "arc" on the outside of the curve
         this.borders = [];
@@ -211,17 +202,16 @@ class Curve{
         });
 
         //some debug code to show direction boxes I think
-        // this.directionBoxes.forEach(box=>{
-        //     console.log("blep",box)
-        //     ctx.fillStyle='#'+(0x1000000+Math.random()*0xffffff).toString(16).substr(1,6);
-        //     ctx.beginPath();
-        //     ctx.moveTo(box.coords[0].x,box.coords[0].y);
-        //     box.coords.forEach(coord=>{
-        //         ctx.lineTo(coord.x,coord.y);
-        //     })
-        //     ctx.closePath();
-        //     ctx.fill();
-        //     })
+        this.directionBoxes.forEach((box)=>{
+            ctx.fillStyle=(box.direction=="left")?`#000000`:`#FFFFFF`;
+            ctx.beginPath();
+            ctx.moveTo(box.coords[0].x,box.coords[0].y);
+            box.coords.forEach(coord=>{
+                ctx.lineTo(coord.x,coord.y);
+            })
+            ctx.closePath();
+            ctx.fill();
+            })
     }
 
     //draw wireframe 
